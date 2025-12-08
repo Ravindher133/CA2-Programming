@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask import request, jsonify
 
 app = Flask(__name__)
 
@@ -19,9 +20,27 @@ def hash_password(password):
     return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
 def verify_password(password, hashed):
-    return bcrypt.checkpw(password.encode(), hashed.encode())    
+    return bcrypt.checkpw(password.encode(), hashed.encode())  
 
-@app.route("/")
+def register():
+    data = request.json
+    username = data["username"]
+    password = data["password"]
+    
+    if User.query.filter_by(username=username).first():
+        return jsonify({"error": "User already exists"}), 400
+    
+    new_user = User(
+        username=username,
+        password_hash=hash_password(password)
+    )  
+    
+    db.session.add(new_user)
+    db.session.commit()
+    
+    return {"message": "User registered successfully"}
+
+@app.route("/api/register", methods=["POST"])
 def home():
     return {"message": "Threat API Running"}
 
