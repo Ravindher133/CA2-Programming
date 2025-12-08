@@ -40,8 +40,10 @@ def register():
     
     return {"message": "User registered successfully"}
 
-@app.route("/api/register", methods=["POST"])
-def home():
+#@app.route("/api/register", methods=["POST"])
+#def home():
+@app.route('/add_log', methods=['GET', 'POST'])
+def app_log ():
     return {"message": "Threat API Running"}
 
 if __name__ == "__main__":
