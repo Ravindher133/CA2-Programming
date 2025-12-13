@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 import jwt
 import bcrypt
 from datetime import datetime, timedelta
-from functools import wraps   # FIXED: Required for decorator
+from functools import wraps  
 
 app = Flask(__name__)
 
@@ -13,7 +13,6 @@ app.config['SECRET_KEY'] = "mysecret"
 
 db = SQLAlchemy(app)
 
-# ------------------------- USER MODEL -------------------------
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -25,7 +24,6 @@ def hash_password(password):
 def verify_password(password, hashed):
     return bcrypt.checkpw(password.encode(), hashed.encode())
 
-# ------------------------- REGISTER API -------------------------
 @app.route("/api/register", methods=["POST"])
 def register():
     data = request.json
@@ -45,7 +43,6 @@ def register():
 
     return {"message": "User registered successfully"}
 
-# ------------------------- LOGIN API -------------------------
 @app.route('/api/login', methods=['POST'])
 def login():
     data = request.get_json()
@@ -69,9 +66,8 @@ def login():
 
     return jsonify({"token": token})
 
-# ------------------------- TOKEN DECORATOR -------------------------
 def token_required(f):
-    @wraps(f)        # FIXED: Prevents endpoint conflict
+    @wraps(f)        
     def decorated(*args, **kwargs):
         token = None
 
@@ -92,7 +88,6 @@ def token_required(f):
         return f(current_user, *args, **kwargs)
     return decorated
 
-# ------------------------- INCIDENT MODEL -------------------------
 class Incident(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
@@ -101,7 +96,6 @@ class Incident(db.Model):
     status = db.Column(db.String(20), default="Open")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-# ------------------------- CREATE INCIDENT -------------------------
 @app.route("/api/incidents", methods=["POST"])
 @token_required
 def create_incident(current_user):
@@ -128,7 +122,6 @@ def create_incident(current_user):
 
     return jsonify({"message": "Incident created successfully!"}), 201
 
-# ------------------------- LIST INCIDENTS -------------------------
 @app.route("/api/incidents", methods=["GET"])
 @token_required
 def list_incidents(current_user):
@@ -147,7 +140,6 @@ def list_incidents(current_user):
 
     return jsonify({"incidents": output})
 
-# ------------------------- RUN APP -------------------------
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
