@@ -7,14 +7,12 @@ from functools import wraps
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
-# Config
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///threat.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SECRET_KEY"] = "mysecret"
 
 db = SQLAlchemy(app)
 
-# Models
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -31,7 +29,6 @@ class Incident(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     user = db.relationship("User", backref="incidents")
 
-# Helpers
 def hash_password(password):
     return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
@@ -56,7 +53,6 @@ def token_required(f):
         return f(current_user, *args, **kwargs)
     return decorated
 
-# Routes
 @app.route("/")
 def login_page():
     return render_template("login.html")
@@ -93,7 +89,6 @@ def logout():
     session.clear()
     return redirect(url_for("login_page"))
 
-# API Routes
 @app.route("/api/register", methods=["POST"])
 def api_register():
     data = request.json
@@ -151,7 +146,6 @@ def list_incidents(current_user):
         "status": i.status
     } for i in incidents])
 
-# Bootstrap admin
 def create_admin():
     if not User.query.filter_by(username="admin").first():
         admin = User(username="admin", password_hash=hash_password("admin123"), role="admin")
